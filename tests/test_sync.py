@@ -1,6 +1,13 @@
-"""Repo-level consistency: every skill carries an identical copy of the contract module."""
+"""Repo-level consistency: every skill carries an identical copy of the contract module.
+
+The copy is a package directory, ``scripts/accord_contract/__init__.py``, because the
+catalog runner (skills-runner) runs the single ``.py`` file directly inside ``scripts/``
+and refuses a directory that holds two.
+"""
 
 from helpers import SKILLS_ROOT, TOOLS_ROOT
+
+CONTRACT_COPY = ("scripts", "accord_contract", "__init__.py")
 
 
 def _skill_dirs():
@@ -12,10 +19,10 @@ def test_every_skill_has_an_identical_contract_copy():
     skill_dirs = _skill_dirs()
     assert skill_dirs, "no skills yet"
     for d in skill_dirs:
-        assert (d / "scripts" / "accord_contract.py").read_text() == src, d.name
+        assert d.joinpath(*CONTRACT_COPY).read_text() == src, d.name
 
 
-def test_one_script_per_skill():
+def test_exactly_one_python_file_directly_inside_scripts():
     for d in _skill_dirs():
-        scripts = [p for p in (d / "scripts").glob("*.py") if p.name != "accord_contract.py"]
-        assert len(scripts) == 1, d.name
+        py_files = sorted(p.name for p in (d / "scripts").iterdir() if p.suffix == ".py")
+        assert len(py_files) == 1, (d.name, py_files)

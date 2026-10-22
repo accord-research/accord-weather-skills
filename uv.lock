@@ -36,7 +36,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "skills-runner", git = "https://github.com/tescalada/skills-runner" }]
+requires-dist = [{ name = "skills-runner", git = "https://github.com/weather-skills/skills-runner" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -3384,7 +3384,7 @@ wheels = [
 [[package]]
 name = "skills-runner"
 version = "0.1.0"
-source = { git = "https://github.com/tescalada/skills-runner#8531eb142db6bd8a94c59b38048d1a3c7783f167" }
+source = { git = "https://github.com/weather-skills/skills-runner#a3e5da2edbea7bd092057b7cced66c9b833cc2c9" }
 
 [[package]]
 name = "smmap"
