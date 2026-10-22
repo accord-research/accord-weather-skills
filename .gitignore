@@ -218,3 +218,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Working documents stay local (same convention as acmadDL and africas2s)
+docs/plans/
+docs/specs/
