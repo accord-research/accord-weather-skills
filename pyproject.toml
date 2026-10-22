@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling", "skills-runner"]
+build-backend = "hatchling.build"
+
+[project]
+name = "accord-weather-skills"
+version = "0.1.0"
+description = "ACCORD seasonal forecasting (acmadDL + africas2s) as weather skills"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12,<3.13"
+dynamic = ["dependencies", "scripts"]
+
+[tool.hatch.metadata.hooks.skills-runner]
+cli = "accord-weather-skills"
+
+[tool.hatch.build.hooks.skills-runner]
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+    "numpy",
+    "xarray",
+    "zarr",
+    "weather-skills-core>=0.1.1",
+    "acmadDL",
+    "africas2s",
+    "matplotlib",
+    "cartopy",
+    "h5netcdf",
+]
+
+[tool.uv.sources]
+skills-runner = { git = "https://github.com/tescalada/skills-runner" }
+acmadDL = { git = "https://github.com/ACMAD-Niamey/acmadDL", rev = "eda1fea8b262953fb1ce56098ce6432365be8e3b" }
+africas2s = { git = "https://github.com/ACMAD-Niamey/africas2s", rev = "86be4da2ac8ef71034cbf59d1f6ea64f19d2dd8f" }
+
+[tool.uv]
+override-dependencies = ["zarr>=3.1.0", "xarray>=2026.7"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "skills"]
+python_files = ["test_*.py"]
+pythonpath = ["tests", "tools"]
+markers = ["integration: needs the network and credentials"]
