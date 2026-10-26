@@ -29,6 +29,27 @@ METHODS = ["cca", "bcsd", "qm", "dqm", "delta", "climatology", "rank-analog"]
 _INIT_RE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 
 
+def _models_failure(acmaddl, roster, variable, init, target, region, exc):
+    """Name the models acmadDL cannot fetch for this issuance and suggest --models for the rest.
+
+    ``acmaddl.assemble`` is all-or-nothing and its error ("no data for 2026-2026") does not
+    say which model, so probe the roster one model at a time (cheap: the others are cached).
+    """
+    failed, ok = [], []
+    for row in roster:
+        try:
+            acmaddl.assemble([row], variable, init=init, target=target, region=region, verbose=False)
+            ok.append(row[1])
+        except Exception as e:  # noqa: BLE001
+            failed.append(f"{row[1]} ({type(e).__name__}: {e})")
+    if not failed:
+        return f"fetching the forecast models failed: {type(exc).__name__}: {exc}"
+    msg = f"no data for {init} from {', '.join(failed)}."
+    if ok:
+        msg += " Rerun with the models that have data: " + " ".join(f"--models {p}" for p in ok)
+    return msg
+
+
 @weather_skill(name="seasonal-outlook", version=_SKILL_VERSION)
 @weather_skill.argument("--init", required=True, help="Issuance month YYYY-MM, e.g. 2025-02.")
 @weather_skill.argument("--target", required=True, help="Target season as month initials: MAM, JJAS, OND, ...")
@@ -72,7 +93,7 @@ def seasonal_outlook(output, init, target, bbox, models=None, predictand="obs/ch
     try:
         tracks = acmaddl.assemble(roster, variable, init=init, target=target, region=region, verbose=False)
     except Exception as exc:  # noqa: BLE001
-        raise UsageError(f"fetching the forecast models failed: {type(exc).__name__}: {exc}") from exc
+        raise UsageError(_models_failure(acmaddl, roster, variable, init, target, region, exc)) from exc
     try:
         obs_raw = acmaddl.fetch(predictand, variable, region=region, hindcast=window, target=target,
                                 seasonal="mean", verbose=False, progress=False)

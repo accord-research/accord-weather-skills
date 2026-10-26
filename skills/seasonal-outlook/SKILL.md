@@ -44,6 +44,7 @@ Pass three `-o` flags, in this order: the forecast, the cross-validated hindcast
 ### Notes
 
 - Skill scores are computed on held-out years. Treat a `score_rpss` below 0 as no skill, below 0.05 as marginal, and below 0.15 as modest.
+- If a model has no issuance for `--init` at the data source, the error names it and lists `--models` flags for the models that do.
 - acmadDL doesn't yet support wrap-around seasons (`DJF`) for the CHIRPS predictand.
 
 ### Example

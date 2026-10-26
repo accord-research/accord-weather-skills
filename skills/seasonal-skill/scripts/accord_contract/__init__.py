@@ -72,10 +72,20 @@ def _pint_spelling(units):
     return text
 
 
-def _season_attrs(target, init_month=None):
+# Amount units, as pint spells them: a season of these is a total, not a mean.
+# Rhiza's convert-to-totals tells an amount from a rate by units and cell_methods.
+_AMOUNT_UNITS = {"mm", "cm", "m", "kg m-2"}
+
+
+def _season_attrs(target, init_month=None, units=None):
+    """Season labels for a variable: ``target_season``, ``aggregation_period`` and, for a
+    physical quantity, ``cell_methods`` (``time: sum`` for an amount such as acmadDL's
+    NMME totals in mm, ``time: mean`` for a rate or a temperature). Probabilities
+    (``units = "1"``) and variables without units get no ``cell_methods``."""
     attrs = {"target_season": str(target),
-             "aggregation_period": f"{len(season_months(target))} month",
-             "cell_methods": "time: mean"}
+             "aggregation_period": f"{len(season_months(target))} month"}
+    if units is not None and str(units) != "1":
+        attrs["cell_methods"] = "time: sum" if _pint_spelling(units) in _AMOUNT_UNITS else "time: mean"
     if init_month is not None:
         attrs["init_month"] = int(init_month)
     return attrs
@@ -107,7 +117,7 @@ def predictor_to_standard(da, *, product, variable, init_month, target, forecast
     v = ds[variable]
     if v.attrs.get("units") is not None:
         v.attrs["units"] = _pint_spelling(v.attrs["units"])
-    v.attrs.update(_season_attrs(target, init_month))
+    v.attrs.update(_season_attrs(target, init_month, v.attrs.get("units")))
     return ds
 
 
@@ -133,7 +143,7 @@ def obs_to_standard(da, *, product, variable, target):
     v = ds[variable]
     if v.attrs.get("units") is not None:
         v.attrs["units"] = _pint_spelling(v.attrs["units"])
-    v.attrs.update(_season_attrs(target))
+    v.attrs.update(_season_attrs(target, units=v.attrs.get("units")))
     return ds
 
 
@@ -229,7 +239,7 @@ def terciles_to_variables(probs, *, init_month, target, cross_validated, method,
         part[name].attrs["units"] = "1"
         part[name].attrs["long_name"] = _LONG_NAMES[name]
         parts.append(part)
-    ds = xr.merge(parts, combine_attrs="override")
+    ds = xr.merge(parts, compat="override", combine_attrs="override")
     ds.attrs = {
         "weather_skills_source": f"africas2s:{method}",
         "cross_validated": bool(cross_validated),

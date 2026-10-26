@@ -18,7 +18,7 @@ Every script wraps a public verb of acmadDL or africas2s, the same verbs that th
 
 ## Run a skill
 
-You can run the skills in three ways.
+You can run the skills in three ways. For a hands-on walkthrough of every skill, see the [tutorial](docs/tutorial.md).
 
 ### From a clone
 
@@ -94,7 +94,7 @@ A probability file states how it was made and whether it is cross-validated, in 
 
 The weather-skills vocabulary has no year axis and no tercile dimension, so the translation is explicit:
 
-- A hindcast on ACCORD's `year` axis becomes an `init_time` axis (the first of the issuance month in each year) with one `lead_time`, the nominal offset to the target season. The variable carries `target_season`, `init_month`, `aggregation_period`, and `cell_methods`.
+- A hindcast on ACCORD's `year` axis becomes an `init_time` axis (the first of the issuance month in each year) with one `lead_time`, the nominal offset to the target season. The variable carries `target_season`, `init_month`, `aggregation_period`, and `cell_methods`: `time: sum` for an amount such as NMME's seasonal totals in `mm`, `time: mean` for a rate or a temperature. Probabilities carry no `cell_methods`.
 - A single issuance is written the way Rhiza's own fetchers write forecasts: a scalar `time` plus a one-step `step` axis.
 - Seasonal observations become a `time` axis, one step per year at the season's first day. Precipitation stays the seasonal mean rate that acmadDL returns (`mm month-1` for CHIRPS monthly), labeled `cell_methods: time: mean`. For a seasonal total, run `convert-to-totals`.
 - Tercile probabilities are three variables, `prob_below`, `prob_normal`, and `prob_above`, each with `units = "1"`. The dataset carries `method`, `tercile_method`, `cv_window`, `hindcast_years`, and `cross_validated`.
