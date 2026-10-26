@@ -49,7 +49,7 @@ uv run ${CLAUDE_SKILL_DIR}/scripts/accord_fetch.py --product nmme/ccsm4 -v preci
 
 ### Output
 
-- Hindcast: dimensions `(init_time, lead_time, member, lat, lon)`. `init_time` is the first of the `--init` month in each hindcast year, and the single `lead_time` holds the nominal offset to the season's first day. Variable attributes: `target_season`, `init_month`, `aggregation_period` (`3 month` for a three-month season), `cell_methods: time: mean`, and pint-parseable `units` (`mm day-1` for model rainfall).
+- Hindcast: dimensions `(init_time, lead_time, member, lat, lon)`. `init_time` is the first of the `--init` month in each hindcast year, and the single `lead_time` holds the nominal offset to the season's first day. Variable attributes: `target_season`, `init_month`, `aggregation_period` (`3 month` for a three-month season), pint-parseable `units`, and `cell_methods`. NMME rainfall arrives as the seasonal total in `mm` with `cell_methods: time: sum`; a rate or a temperature carries `time: mean`.
 - Real-time forecast: the same, with a scalar `time` (the issuance) and a one-step `step` axis instead of `init_time`. This is the layout that Rhiza's own fetchers write.
 - Observations: dimensions `(time, lat, lon)`, where `time` is the first day of the season in each year. The value is the seasonal mean rate (`mm month-1` for CHIRPS monthly, `mm day-1` for GPCP and ERA5), with `cell_methods: time: mean` and `aggregation_period` stamped. For a seasonal total, run `convert-to-totals`.
 - Dataset attributes: `weather_skills_source = acmaddl:<product>`, `acmaddl_version`, and `africas2s_version`.

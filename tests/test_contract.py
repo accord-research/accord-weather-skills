@@ -208,3 +208,24 @@ def test_skill_to_standard_keeps_every_map_the_report_holds(year_obs):
     ds = C.skill_to_standard(report, metrics=["rpss", "roc"])
     assert {"rpss", "roc_an", "roc_bn", "roc_nn"} <= set(ds.data_vars)
     assert ds.attrs["metrics"] == ["rpss", "roc"] and "score_roc_an" in ds.attrs
+
+
+def test_predictor_to_standard_labels_a_seasonal_total_as_a_sum(year_hindcast):
+    # acmadDL returns NMME seasons as totals in mm ("Total precipitation"). Rhiza's
+    # convert-to-totals tells an amount from a rate by units and cell_methods, so a
+    # total labelled "time: mean" would be multiplied by the season again.
+    total = year_hindcast.copy()
+    total.attrs["units"] = "mm"
+    ds = C.predictor_to_standard(total, product="nmme/ccsm4", variable="precip", init_month=9, target="OND")
+    v = ds["precip"]
+    assert v.attrs["units"] == "mm"
+    assert v.attrs["cell_methods"] == "time: sum"
+    assert v.attrs["aggregation_period"] == "3 month"
+
+
+def test_tercile_variables_carry_no_cell_methods(year_obs):
+    ds = C.terciles_to_variables(tercile_cv(year_obs), init_month=2, target="MAM", cross_validated=True, method="ereg")
+    for name in C.PROB_VARS:
+        assert "cell_methods" not in ds[name].attrs, name
+        assert ds[name].attrs["aggregation_period"] == "3 month"
+        assert ds[name].attrs["target_season"] == "MAM"

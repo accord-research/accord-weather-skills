@@ -49,6 +49,27 @@ def test_outlook_needs_three_outputs(tmp_path, skill, fake_acmaddl, capsys):
     assert "3" in capsys.readouterr().err
 
 
+def test_outlook_names_the_model_without_data(tmp_path, skill, fake_acmaddl, monkeypatch, capsys):
+    # acmadDL's assemble is all-or-nothing and reports "no data for 2026-2026" without
+    # saying which model; the skill must name it and suggest --models for the others.
+    import acmaddl
+
+    honest = acmaddl.assemble
+
+    def missing_spear(roster, variable, **kwargs):
+        if any(product == "nmme/spear" for _, product, _ in roster):
+            raise ValueError("single_year_fetch: no data for 2026-2026")
+        return honest(roster, variable, **kwargs)
+
+    monkeypatch.setattr(acmaddl, "assemble", missing_spear)
+    fc, cv, png = (str(tmp_path / n) for n in ("fc.zarr", "cv.zarr", "map.png"))
+    run_expecting_usage_error(
+        capsys, skill, "--init", "2026-09", "--target", "OND", "--bbox", "5/34/-5/42", "--hindcast", "2001", "2012",
+        "--method", "bcsd", "--cv-window", "1", "-o", fc, "-o", cv, "-o", png,
+        match=r"nmme/spear.*no data for 2026-2026.*--models nmme/ccsm4 --models nmme/cfsv2 --models nmme/geoss2s "
+              r"--models nmme/cansipsic4 --models nmme/cesm1")
+
+
 @pytest.mark.integration
 def test_outlook_live_kenya_ond(tmp_path, skill):
     fc, cv, png = (str(tmp_path / n) for n in ("fc.zarr", "cv.zarr", "map.png"))
