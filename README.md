@@ -116,7 +116,7 @@ uv sync
 uv run pytest -q -m "not integration"      # offline tests
 uv run pytest -q -m integration            # live fetches (network, credentials)
 uv run tools/sync_contract.py              # copy the contract module into every skill (--check only compares)
-uvx --from "git+https://github.com/rhiza-research/weather-skills-core@main" weather-skills-core lint skills --strict error
+uvx --from "git+https://github.com/weather-skills/weather-skills-core@main" weather-skills-core lint skills --strict error
 ```
 
 The tests import each script in-process and call it with an argv list, which is Rhiza's own test pattern. acmadDL's network verbs are stubbed by `tests/helpers.py`. To bump the acmadDL or africas2s pin, edit the same commit in every script's header and in `pyproject.toml`.
